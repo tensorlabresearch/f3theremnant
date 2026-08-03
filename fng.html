@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="F3 The Remnant FNG information form.">
+  <title>FNG Information | F3 The Remnant</title>
+  <link rel="icon" href="favicon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="site.js" defer></script>
+</head>
+<body>
+<main class="fng-page">
+  <header class="site-header"><a class="brand" href="index.html" aria-label="F3 The Remnant home"><img src="assets/logo.webp" alt="F3 The Remnant"></a></header>
+  <section class="register-section section">
+    <div class="register-copy"><p class="eyebrow">F3 The Remnant</p><h1>Join the<br>Remnant PAX</h1><p>Complete this form after you have received your F3 name. We’ll email you an invitation to the F3 The Remnant Slack workspace.</p></div>
+    <form class="register-form" id="fng-form">
+      <div class="form-row"><label>First name<input name="firstName" required></label><label>Last name<input name="lastName" required></label></div>
+      <div class="form-row"><label>F3 name<input name="f3Name" required autocomplete="nickname"></label><label>Location<select name="aoId" id="ao-select" required disabled><option value="" selected>Loading AOs…</option></select></label></div>
+      <div class="form-row"><label>Phone<input name="phone" type="tel" required></label><label>Email<input name="email" type="email" required></label></div>
+      <label>Referring PAX <small>(optional)</small><input name="referringPax"></label>
+      <label class="honeypot" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+      <button class="button primary" type="submit">Submit →</button>
+      <p class="form-note" id="form-status" role="status">We’ll email your invitation to the F3 The Remnant Slack workspace.</p>
+    </form>
+    <div class="success-message" id="fng-success" hidden><span>✓</span><h2>Check your inbox.</h2><p>Your invitation to the F3 The Remnant Slack workspace is on its way.</p><button class="button secondary" id="submit-another" type="button">Submit another</button></div>
+  </section>
+</main>
+</body>
+</html>

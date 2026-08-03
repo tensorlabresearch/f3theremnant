@@ -1,0 +1,12 @@
+{
+  "name": "f3theremnant",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy . --project-name f3theremnant"
+  },
+  "devDependencies": {
+    "wrangler": "^4.70.0"
+  }
+}
