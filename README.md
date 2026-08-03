@@ -6,6 +6,7 @@ Static Cloudflare Pages clone based on `f3cherokee.com`, retitled for `f3theremn
 
 ```bash
 npm install
+npx wrangler pages project create f3theremnant --production-branch main
 npm run deploy
 ```
 
