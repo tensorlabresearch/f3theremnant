@@ -27,7 +27,7 @@ h1 { font-size:clamp(64px,5.4vw,94px); margin:0 0 32px; letter-spacing:0; }
 .button.primary { color:#080604; background:linear-gradient(180deg,#e1bd73,#b88634); border-color:#d6b166; }
 .button.primary:hover { background:linear-gradient(180deg,#f0d08c,#c99743); }
 .button.secondary { color:#fff; background:transparent; border-color:var(--yellow); }
-.hero-photo { margin:54px 54px 54px 0; background:linear-gradient(0deg,rgba(8,6,4,.18),rgba(8,6,4,.18)),url("assets/hero.webp") center/cover; }
+.hero-photo { margin:54px 54px 54px 0; background:linear-gradient(0deg,rgba(8,6,4,.16),rgba(8,6,4,.16)),url("assets/hero-remnant.webp?v=brand4") center/cover; }
 .next-card { position:absolute; z-index:3; right:8vw; bottom:54px; width:min(460px,36vw); padding:24px; background:rgba(10,9,7,.92); border:1px solid rgba(212,176,111,.28); box-shadow:0 18px 50px rgba(0,0,0,.28); }
 .card-heading { display:flex; justify-content:space-between; color:#9ca9b5; font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
 .live-dot { display:inline-block; width:7px; height:7px; margin-right:8px; border-radius:50%; background:var(--yellow); box-shadow:0 0 0 5px rgba(255,214,0,.12); }
