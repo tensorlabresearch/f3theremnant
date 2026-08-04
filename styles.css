@@ -90,7 +90,7 @@ h1 { font-size:clamp(64px,5.4vw,94px); margin:0 0 32px; letter-spacing:0; }
 .directions-link:hover { color:#fff; }
 .data-note,.form-note { margin:20px 0 0; color:#7f8d99; font-size:12px; }
 .first-day { display:grid; grid-template-columns:1fr 1fr; background:var(--paper); color:var(--ink); }
-.first-day-photo { min-height:760px; background:linear-gradient(0deg,rgba(8,6,4,.12),rgba(8,6,4,.12)),url("assets/community-flags.webp?v=brand3") center/cover; }
+.first-day-photo { min-height:760px; background:linear-gradient(0deg,rgba(8,6,4,.08),rgba(8,6,4,.08)),url("assets/first-day-remnant.webp?v=brand6") center/cover; }
 .first-day-copy { padding:100px clamp(30px,6vw,100px); }
 .first-day-copy ol { list-style:none; padding:0; margin:48px 0; counter-reset:steps; }
 .first-day-copy li { position:relative; padding:0 0 26px 50px; border-left:1px solid #ccd0cf; counter-increment:steps; }
