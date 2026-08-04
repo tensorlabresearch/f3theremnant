@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title">
+  <title id="title">F3</title>
+  <circle cx="50" cy="50" r="46" fill="#040403" stroke="#d4b06f" stroke-width="6"/>
+  <circle cx="50" cy="50" r="38" fill="none" stroke="#d4b06f" stroke-width="2" opacity=".72"/>
+  <text x="50" y="60" fill="#f4ead7" font-family="Impact, Arial Black, sans-serif" font-size="38" font-weight="900" text-anchor="middle" letter-spacing="-2">F3</text>
+</svg>
