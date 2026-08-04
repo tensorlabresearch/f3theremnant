@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "include": [
+    "/screenshots/*",
+    "/*"
+  ],
+  "exclude": [
+    "/assets/*",
+    "/styles.css",
+    "/site.js"
+  ]
+}
