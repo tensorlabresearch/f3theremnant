@@ -1,6 +1,6 @@
 # F3 The Remnant
 
-Static Cloudflare Pages clone based on `f3cherokee.com`, retitled for `f3theremnant.com`.
+Static Cloudflare Pages site for `f3theremnant.com`.
 
 ## Deploy
 
@@ -37,7 +37,3 @@ Preserve query string: yes
 ```
 
 Also redirect `www.f3remnant.com/*` and `www.f3theremnant.com/*` to the apex primary if you want one canonical address.
-
-## Asset Note
-
-`assets/logo.webp` and `favicon.png` came from the source clone and likely still contain F3 Cherokee branding. Replace them before launch.

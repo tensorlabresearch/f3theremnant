@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 180" role="img" aria-labelledby="title desc">
+  <title id="title">F3 The Remnant</title>
+  <desc id="desc">F3 The Remnant logo</desc>
+  <rect width="980" height="180" fill="#050505"/>
+  <circle cx="91" cy="90" r="62" fill="none" stroke="#fff" stroke-width="14"/>
+  <path d="M68 55h54v18H88v16h29v18H88v40H68z" fill="#fff"/>
+  <path d="M121 55h44v18h-30v15h24c16 0 28 12 28 28 0 18-14 31-33 31h-35v-18h34c8 0 14-5 14-13 0-7-5-12-14-12h-18V87h18c7 0 12-4 12-10 0-3-1-5-3-7h-41z" fill="#fff" transform="translate(-48 0)"/>
+  <path d="M181 90h60" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+  <text x="272" y="78" fill="#fff" font-family="Arial Black, Impact, sans-serif" font-size="62" font-weight="900" letter-spacing="2">F3 THE</text>
+  <text x="272" y="142" fill="#fff" font-family="Arial Black, Impact, sans-serif" font-size="62" font-weight="900" letter-spacing="2">REMNANT</text>
+  <rect x="844" y="45" width="74" height="18" fill="#6bbe45"/>
+  <rect x="800" y="82" width="118" height="18" fill="#6bbe45"/>
+  <rect x="844" y="119" width="74" height="18" fill="#6bbe45"/>
+</svg>

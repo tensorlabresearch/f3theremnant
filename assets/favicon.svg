@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="F3 The Remnant">
+  <rect width="256" height="256" fill="#050505"/>
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#fff" stroke-width="18"/>
+  <path d="M87 80h82v24h-50v22h43v24h-43v56H87z" fill="#fff"/>
+  <path d="M167 80h55v24h-37v21h26c21 0 37 15 37 37 0 25-19 43-45 43h-44v-24h42c12 0 20-7 20-18 0-10-8-17-20-17h-23v-24h21c9 0 15-5 15-13 0-3-1-5-3-7h-44z" fill="#6bbe45" transform="translate(-62 0)"/>
+</svg>
