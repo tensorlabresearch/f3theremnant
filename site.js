@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("/api/schedule", { headers: { accept: "application/json" } });
       if (!response.ok) throw new Error("Schedule unavailable");
-      const { events = [] } = await response.json();
+      const { events = [], openQs = 0 } = await response.json();
       if (!events.length) throw new Error("No active workouts");
 
       const sortedEvents = [...events].sort((a, b) =>
@@ -107,7 +107,10 @@ document.addEventListener("DOMContentLoaded", () => {
         String(a.name || "").localeCompare(String(b.name || ""))
       );
 
-      if (count) count.textContent = `${events.length} workout${events.length === 1 ? "" : "s"} over the next seven days · Always free`;
+      if (count) {
+        const base = `${events.length} workout${events.length === 1 ? "" : "s"} over the next seven days · Always free`;
+        count.textContent = openQs ? `${base} · ${openQs} still need a Q` : base;
+      }
 
       if (list) {
         const grouped = new Map();
@@ -132,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   <div class="workout-details">
                     <h4>${esc(event.name)}</h4>
                     <p><strong>${esc(locationLabel(event))}</strong>${address ? `<span>${esc(address)}</span>` : ""}</p>
+                    <p class="workout-q${event.q ? "" : " open"}">${event.q ? `Q: <strong>${esc(event.q)}</strong>` : "Q needed — sign up in Slack"}</p>
                     ${event.description ? `<p class="workout-description">${esc(event.description)}</p>` : ""}
                   </div>
                   <span class="workout-type">${esc(type)}</span>

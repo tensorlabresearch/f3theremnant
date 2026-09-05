@@ -84,6 +84,9 @@ h1 { font-size:clamp(64px,5.4vw,94px); margin:0 0 32px; letter-spacing:0; }
 .workout-details p { margin:0; color:#d2d9df; font-size:14px; line-height:1.45; }
 .workout-details p strong,.workout-details p span { display:block; }
 .workout-details p span { margin-top:3px; color:#82909c; font-size:12px; }
+.workout-q { margin-top:8px !important; color:#cfc0a0; font-size:13px; }
+.workout-q strong { color:var(--gold); }
+.workout-q.open { color:#e0a06a; }
 .workout-details .workout-description {margin-top:10px;color:#aab4bf;font-size:13px;line-height:1.5;}
 .workout-type { justify-self:start; padding:7px 10px; color:#dfcfaa; background:#2a2115; font-size:11px; font-weight:900; text-transform:uppercase; }
 .directions-link { justify-self:end; color:var(--yellow); font-size:13px; font-weight:900; text-transform:uppercase; white-space:nowrap; }
