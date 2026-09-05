@@ -139,6 +139,22 @@ footer { padding:70px clamp(24px,7vw,110px) 30px; background:#030302; }
 .footer-links { display:grid; grid-template-columns:1fr 1fr; gap:16px; font-weight:700; }
 .footer-links a:hover { color:var(--yellow); }
 .footer-bottom { display:flex; justify-content:space-between; margin-top:60px; padding-top:25px; border-top:1px solid var(--line); color:#75818c; font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+.upcoming-section { background:#0b0907; }
+.event-list { display:grid; gap:18px; }
+.event-card { display:grid; grid-template-columns:88px minmax(220px,1fr) 150px; align-items:start; gap:24px; padding:24px; background:#17130d; border:1px solid var(--line); border-left:3px solid var(--yellow); }
+.event-date { display:grid; place-items:center; gap:2px; padding:12px 0; background:#070604; border:1px solid var(--line); }
+.event-date span { color:var(--gold); font-size:12px; font-weight:900; letter-spacing:.1em; }
+.event-date b { font-family:Impact,"Arial Narrow",sans-serif; font-size:34px; line-height:1; }
+.event-details h3 { margin:0 0 8px; font-family:"Arial Narrow",Impact,sans-serif; font-size:24px; font-weight:900; text-transform:uppercase; letter-spacing:.01em; }
+.event-when { margin:0; color:var(--yellow); font-size:14px; font-weight:900; }
+.event-location { margin:7px 0 0; color:#82909c; font-size:13px; }
+.event-description { margin:13px 0 0; color:#aab4bf; font-size:14px; line-height:1.6; white-space:pre-line; }
+.event-meta { display:grid; gap:12px; justify-items:end; }
+.event-tag { padding:7px 10px; color:#dfcfaa; background:#2a2115; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+.subscribe-card { display:grid; grid-template-columns:1fr auto; gap:clamp(28px,4vw,56px); align-items:center; margin-top:46px; padding:36px; background:#17130d; border:1px solid var(--line); }
+.subscribe-card h2 { margin:0 0 12px; font-size:clamp(28px,3vw,38px); }
+.subscribe-card p:not(.eyebrow) { margin:0; max-width:560px; color:#aab4bf; font-size:16px; line-height:1.65; }
+.subscribe-actions { display:grid; gap:14px; }
 @media (max-width:900px) {
   .site-header { height:72px; }
   .menu-button { display:block; }
@@ -200,4 +216,21 @@ footer { padding:70px clamp(24px,7vw,110px) 30px; background:#030302; }
 .register-form button[disabled] {
   cursor: wait;
   opacity: .65;
+}
+
+@media (max-width:900px) {
+  .event-card { grid-template-columns:72px minmax(0,1fr); }
+  /* Outrank the global .directions-link rule that repositions it for the
+     workout grid, which has a different column layout than these cards. */
+  .event-meta { grid-column:2; grid-auto-flow:column; justify-content:start; justify-items:start; align-items:center; gap:18px; }
+  .event-meta .directions-link { grid-column:auto; justify-self:start; }
+  .subscribe-card { grid-template-columns:1fr; }
+}
+
+@media (max-width:600px) {
+  .event-card { gap:16px; padding:18px; }
+  .event-date b { font-size:28px; }
+  .event-details h3 { font-size:21px; }
+  .subscribe-card { padding:24px; }
+  .subscribe-actions .button { width:100%; }
 }

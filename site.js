@@ -157,6 +157,91 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  const eventDateParts = (date) => {
+    const match = String(date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return { month: "", day: "", weekday: "" };
+    const parsed = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    return {
+      month: MONTHS[parsed.getUTCMonth()],
+      day: String(parsed.getUTCDate()),
+      weekday: WEEKDAY_NAMES[parsed.getUTCDay()],
+    };
+  };
+
+  const tagLabel = (tag) => ({
+    csaup: "CSAUP",
+    service: "Service",
+    convergence: "Convergence",
+  }[tag] || tag.charAt(0).toUpperCase() + tag.slice(1));
+
+  const mapsUrl = (location) =>
+    `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location)}`;
+
+  const timeRange = (event) => {
+    if (event.allDay) return "All day";
+    const start = timeLabel(event.startTime);
+    const end = event.endTime ? timeLabel(event.endTime) : "";
+    return end && end !== start ? `${start} – ${end}` : start;
+  };
+
+  const eventCard = (event, compact) => {
+    const { month, day, weekday } = eventDateParts(event.startDate);
+    const tags = Array.isArray(event.tags) ? event.tags : [];
+    return `<article class="event-card">
+      <div class="event-date" aria-hidden="true"><span>${esc(month)}</span><b>${esc(day)}</b></div>
+      <div class="event-details">
+        <h3>${esc(event.name)}</h3>
+        <p class="event-when">${esc(weekday)}, ${esc(dateLabel(event.startDate))} · ${esc(timeRange(event))}</p>
+        ${event.location ? `<p class="event-location">${esc(event.location)}</p>` : ""}
+        ${!compact && event.description ? `<p class="event-description">${esc(event.description)}</p>` : ""}
+      </div>
+      <div class="event-meta">
+        ${tags.map((tag) => `<span class="event-tag">${esc(tagLabel(tag))}</span>`).join("")}
+        ${event.location ? `<a class="directions-link" href="${esc(mapsUrl(event.location))}" target="_blank" rel="noopener" aria-label="Get directions to ${esc(event.name)}">Directions <span aria-hidden="true">↗</span></a>` : ""}
+      </div>
+    </article>`;
+  };
+
+  async function loadEvents() {
+    const list = document.querySelector("#event-list");
+    const count = document.querySelector("#events-count");
+    const upcoming = document.querySelector("#upcoming-events");
+    if (!list && !upcoming) return;
+    try {
+      const response = await fetch("/api/events", { headers: { accept: "application/json" } });
+      if (!response.ok) throw new Error("Events unavailable");
+      const { events = [] } = await response.json();
+
+      if (count) {
+        count.textContent = events.length
+          ? `${events.length} upcoming event${events.length === 1 ? "" : "s"} · Always free`
+          : "Nothing on the calendar yet";
+      }
+
+      // An empty calendar is a valid answer, not a failure. Say so plainly
+      // instead of dropping into the error state.
+      if (list) {
+        list.innerHTML = events.length
+          ? events.map((event) => eventCard(event, false)).join("")
+          : '<p class="form-note">Nothing on the calendar right now. Check back soon, or ask in Slack what is being planned.</p>';
+      }
+
+      if (upcoming) {
+        upcoming.innerHTML = events.length
+          ? events.slice(0, 3).map((event) => eventCard(event, true)).join("")
+          : '<p class="form-note">Nothing on the calendar right now. Check back soon.</p>';
+      }
+    } catch {
+      const message = '<p class="form-note error">The event calendar is temporarily unavailable. Please check back shortly.</p>';
+      if (list) list.innerHTML = message;
+      if (upcoming) upcoming.innerHTML = message;
+      if (count) count.textContent = "Events temporarily unavailable";
+    }
+  }
+
   async function loadAos(select, status) {
     try {
       const response = await fetch("/api/aos", { headers: { accept: "application/json" } });
@@ -219,4 +304,5 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadSchedule();
+  loadEvents();
 });
