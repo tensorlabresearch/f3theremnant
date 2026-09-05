@@ -151,6 +151,10 @@ footer { padding:70px clamp(24px,7vw,110px) 30px; background:#030302; }
 .event-description { margin:13px 0 0; color:#aab4bf; font-size:14px; line-height:1.6; white-space:pre-line; }
 .event-meta { display:grid; gap:12px; justify-items:end; }
 .event-tag { padding:7px 10px; color:#dfcfaa; background:#2a2115; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+.calendar-embed-block { margin-top:56px; }
+.embed-title { margin-bottom:26px; }
+.calendar-embed { padding:14px; background:#17130d; border:1px solid var(--line); }
+.calendar-embed iframe { display:block; width:100%; height:680px; border:0; background:#fff; }
 .subscribe-card { display:grid; grid-template-columns:1fr auto; gap:clamp(28px,4vw,56px); align-items:center; margin-top:46px; padding:36px; background:#17130d; border:1px solid var(--line); }
 .subscribe-card h2 { margin:0 0 12px; font-size:clamp(28px,3vw,38px); }
 .subscribe-card p:not(.eyebrow) { margin:0; max-width:560px; color:#aab4bf; font-size:16px; line-height:1.65; }
@@ -228,6 +232,10 @@ footer { padding:70px clamp(24px,7vw,110px) 30px; background:#030302; }
 }
 
 @media (max-width:600px) {
+  /* Google's grid is unusable below this height on a phone; the list above
+     is the primary view there. */
+  .calendar-embed { padding:8px; }
+  .calendar-embed iframe { height:520px; }
   .event-card { gap:16px; padding:18px; }
   .event-date b { font-size:28px; }
   .event-details h3 { font-size:21px; }

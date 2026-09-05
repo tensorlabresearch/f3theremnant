@@ -3,7 +3,7 @@
 // headers are applied here too.
 const SECURITY_HEADERS = {
   "content-security-policy":
-    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests",
+    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; frame-src https://calendar.google.com; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests",
   "strict-transport-security": "max-age=31536000; includeSubDomains",
   "x-frame-options": "DENY",
   "x-content-type-options": "nosniff",
