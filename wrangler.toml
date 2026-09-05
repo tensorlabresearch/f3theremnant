@@ -1,3 +1,10 @@
 name = "f3theremnant"
 compatibility_date = "2026-08-03"
 pages_build_output_dir = "."
+
+# Declared here rather than set through the API: `wrangler pages deploy` treats
+# this file as the source of truth and clears any production var it does not
+# find, so an API-only value silently disappears on the next deploy. Safe to
+# commit — the calendar is public and this is an address, not a credential.
+[vars]
+GCAL_ID = "f3theremnantcalendar@gmail.com"
