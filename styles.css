@@ -92,8 +92,11 @@ h1 { font-size:clamp(64px,5.4vw,94px); margin:0 0 32px; letter-spacing:0; }
 .directions-link { justify-self:end; color:var(--yellow); font-size:13px; font-weight:900; text-transform:uppercase; white-space:nowrap; }
 .directions-link:hover { color:#fff; }
 .data-note,.form-note { margin:20px 0 0; color:#7f8d99; font-size:12px; }
-.first-day { display:grid; grid-template-columns:1fr 1fr; background:var(--paper); color:var(--ink); }
-.first-day-photo { min-height:760px; background:linear-gradient(0deg,rgba(8,6,4,.08),rgba(8,6,4,.08)),url("assets/first-day-dawn-flag.webp?v=dawn2") center/cover; }
+.first-day { display:grid; grid-template-columns:1fr 1fr; align-items:start; background:var(--paper); color:var(--ink); }
+/* Hold the photo at its own 4:3 instead of stretching it to the text column's
+   height. Filling that 928px column meant scaling a 540px-wide source 2.29x
+   and cover-cropping 18% of the width off the ends of the group. */
+.first-day-photo { aspect-ratio:4/3; background:linear-gradient(0deg,rgba(8,6,4,.08),rgba(8,6,4,.08)),url("assets/first-day-dawn-flag.webp?v=dawn3") center/cover; }
 .first-day-copy { padding:100px clamp(30px,6vw,100px); }
 .first-day-copy ol { list-style:none; padding:0; margin:48px 0; counter-reset:steps; }
 .first-day-copy li { position:relative; padding:0 0 26px 50px; border-left:1px solid #ccd0cf; counter-increment:steps; }
@@ -180,7 +183,7 @@ footer { padding:70px clamp(24px,7vw,110px) 30px; background:#030302; }
   .workout-row { grid-template-columns:90px 1fr 110px; }
   .directions-link { grid-column:2 / -1; justify-self:start; }
   .first-day { grid-template-columns:1fr; }
-  .first-day-photo { min-height:450px; background-position:center; }
+  .first-day-photo { aspect-ratio:4/3; background-position:center; }
   .footer-main { grid-template-columns:1fr 1fr; }
 }
 @media (max-width:600px) {
