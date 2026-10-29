@@ -261,6 +261,168 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+  const parseDay = (date) => {
+    const match = String(date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+    return new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  };
+
+  // Moleskin is plain text with the occasional blank line. Escape first, then
+  // rebuild paragraphs so a stray tag in a backblast cannot break the page.
+  const paragraphs = (text) =>
+    String(text || "")
+      .split(/\n{2,}/)
+      .map((block) => block.trim())
+      .filter(Boolean)
+      .map((block) => `<p>${esc(block).replace(/\n/g, "<br>")}</p>`)
+      .join("");
+
+  const paxLine = (backblast) => {
+    const parts = [];
+    if (backblast.q) parts.push(`Q: <strong>${esc(backblast.q)}</strong>`);
+    if (backblast.coq) parts.push(`Co-Q: <strong>${esc(backblast.coq)}</strong>`);
+    return parts.join(" · ");
+  };
+
+  const backblastCard = (backblast, compact) => {
+    const parsed = parseDay(backblast.startDate);
+    const month = parsed ? MONTH_ABBR[parsed.getUTCMonth()] : "";
+    const day = parsed ? String(parsed.getUTCDate()) : "";
+    const count = Number(backblast.paxCount) || 0;
+    const fngs = Number(backblast.fngCount) || 0;
+    const showBody = !compact && backblast.body;
+    return `<article class="backblast-card">
+      <div class="backblast-date" aria-hidden="true"><span>${esc(month)}</span><b>${esc(day)}</b></div>
+      <div class="backblast-body">
+        <header>
+          <h2>${esc(backblast.title)}</h2>
+          <p class="backblast-when">${esc(backblast.ao)}${backblast.startTime ? ` · ${esc(timeLabel(backblast.startTime))}` : ""}${backblast.eventType ? ` · ${esc(backblast.eventType)}` : ""}</p>
+        </header>
+        ${paxLine(backblast) ? `<p class="backblast-q">${paxLine(backblast)}</p>` : ""}
+        ${showBody ? `<div class="backblast-text">${paragraphs(backblast.body)}</div>` : ""}
+        ${!compact && !backblast.body ? `<p class="form-note">The moleskin for this one has not been filled in yet.</p>` : ""}
+        <div class="backblast-meta">
+          ${count ? `<span><b>${count}</b> PAX</span>` : ""}
+          ${fngs ? `<span><b>${fngs}</b> FNG${fngs === 1 ? "" : "s"}</span>` : ""}
+          ${compact ? `<a href="backblasts.html">Read it ↗</a>` : ""}
+        </div>
+      </div>
+    </article>`;
+  };
+
+  async function loadBackblasts() {
+    const list = document.querySelector("#backblast-list");
+    if (!list) return;
+    const count = document.querySelector("#backblast-count");
+    const more = document.querySelector("#backblast-more");
+    const aoSelect = document.querySelector("#backblast-ao");
+    let cursor = "";
+    let loading = false;
+
+    const setBusy = (busy, label) => {
+      loading = busy;
+      if (more) {
+        more.disabled = busy;
+        more.hidden = busy && !label;
+        more.textContent = label || "Load older backblasts";
+      }
+    };
+
+    const fetchPage = async (before) => {
+      const params = new URLSearchParams();
+      if (before) params.set("before", before);
+      if (aoSelect?.value) params.set("ao", aoSelect.value);
+      const response = await fetch(`/api/backblasts?${params}`, {
+        headers: { accept: "application/json" },
+      });
+      if (!response.ok) throw new Error("Backblasts unavailable");
+      return response.json();
+    };
+
+    const render = async (before, append) => {
+      if (loading) return;
+      setBusy(true, append ? "Loading…" : "");
+      if (!append) list.innerHTML = '<p class="form-note">Loading the backblast library…</p>';
+      try {
+        const { backblasts = [], nextBefore = "", hasMore = false } = await fetchPage(before);
+        const html = backblasts.map((backblast) => backblastCard(backblast)).join("");
+
+        if (append) {
+          list.insertAdjacentHTML(
+            "beforeend",
+            html || '<p class="form-note">No backblasts in that stretch. Try again to keep going back.</p>'
+          );
+        } else if (html) {
+          list.innerHTML = html;
+        } else {
+          list.innerHTML = '<p class="form-note">No backblasts here yet. Post one in Slack after your next Q and it will show up.</p>';
+        }
+
+        if (count) {
+          const shown = list.querySelectorAll(".backblast-card").length;
+          count.textContent = shown
+            ? `${shown} backblast${shown === 1 ? "" : "s"}${aoSelect?.value ? ` at ${aoSelect.options[aoSelect.selectedIndex]?.textContent || "this AO"}` : ""} · newest first`
+            : "No backblasts yet";
+        }
+
+        cursor = nextBefore;
+        setBusy(false);
+        if (more) {
+          more.hidden = !hasMore;
+          more.textContent = "Load older backblasts";
+        }
+      } catch {
+        setBusy(false);
+        if (!append) {
+          list.innerHTML = '<p class="form-note error">The backblast library is temporarily unavailable. Please check back shortly.</p>';
+          if (count) count.textContent = "Backblasts temporarily unavailable";
+        } else if (more) {
+          more.textContent = "Could not load more — try again";
+          more.hidden = false;
+        }
+      }
+    };
+
+    const fillAos = async () => {
+      if (!aoSelect) return;
+      try {
+        const response = await fetch("/api/aos", { headers: { accept: "application/json" } });
+        if (!response.ok) return;
+        const { aos = [] } = await response.json();
+        if (!aos.length) return;
+        aoSelect.innerHTML = '<option value="">All AOs</option>' +
+          aos.map((ao) => `<option value="${Number(ao.id)}">${esc(ao.name)}</option>`).join("");
+      } catch {
+        // The AO filter is a convenience; the library works without it.
+      }
+    };
+
+    await fillAos();
+    await render("", false);
+
+    aoSelect?.addEventListener("change", () => render("", false));
+    more?.addEventListener("click", () => render(cursor, true));
+  }
+
+  async function loadBackblastTeaser() {
+    const list = document.querySelector("#backblast-teaser");
+    if (!list) return;
+    try {
+      const response = await fetch("/api/backblasts?limit=3", {
+        headers: { accept: "application/json" },
+      });
+      if (!response.ok) throw new Error("Backblasts unavailable");
+      const { backblasts = [] } = await response.json();
+      list.innerHTML = backblasts.length
+        ? backblasts.map((backblast) => backblastCard(backblast, true)).join("")
+        : '<p class="form-note">The library fills up as Qs post. <a class="inline-link" href="backblasts.html">See the library →</a></p>';
+    } catch {
+      list.innerHTML = '<p class="form-note">The latest backblasts are temporarily unavailable.</p>';
+    }
+  }
+
   const form = document.querySelector("#fng-form");
   const success = document.querySelector("#fng-success");
   const submitAnother = document.querySelector("#submit-another");
@@ -309,4 +471,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadSchedule();
   loadEvents();
+  loadBackblasts();
+  loadBackblastTeaser();
 });

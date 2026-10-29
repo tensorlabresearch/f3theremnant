@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The F3 The Remnant backblast library: every workout we have posted, written by the Q, searchable by AO.">
+  <title>Backblast Library | F3 The Remnant</title>
+  <link rel="icon" href="assets/favicon.png?v=brand2" type="image/png">
+  <link rel="stylesheet" href="styles.css?v=clean14">
+  <script src="site.js" defer></script>
+</head>
+<body>
+<main>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="F3 The Remnant home"><img src="assets/f3-circle.svg?v=mark2" alt=""><span>The Remnant</span></a>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    <nav class="nav" id="site-nav">
+      <a href="index.html">Home</a><a href="schedule.html">Full Schedule</a><a href="backblasts.html">Backblasts</a><a href="events.html">CSAUP &amp; Events</a><a href="index.html#new">For New Guys</a><a href="fng.html">FNG Form</a><a href="mailto:info@f3theremnant.com">Contact</a>
+    </nav>
+  </header>
+
+  <section class="schedule-section section schedule-page-section" id="library">
+    <div class="section-title">
+      <div><p class="eyebrow">Written in the gloom</p><h1 class="schedule-page-title">Backblast library</h1></div>
+      <p>Every backblast posted in Slack lands here automatically. Steal a beatdown, borrow a Q, or see what an AO has been doing for the last few years. Nothing to submit twice.</p>
+    </div>
+
+    <div class="library-toolbar">
+      <p id="backblast-count" aria-live="polite">Loading backblasts…</p>
+      <label class="library-filter">AO
+        <select id="backblast-ao">
+          <option value="">All AOs</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="backblast-list" id="backblast-list" aria-live="polite">
+      <p class="form-note">Loading the backblast library…</p>
+    </div>
+
+    <div class="library-more">
+      <button class="button secondary" id="backblast-more" type="button" hidden>Load older backblasts</button>
+    </div>
+
+    <noscript><p class="form-note error">JavaScript is required to load the backblast library.</p></noscript>
+
+    <div class="subscribe-card">
+      <div>
+        <p class="eyebrow">How this works</p>
+        <h2>Posted in Slack, saved here</h2>
+        <p>When a Q submits a backblast with the F3 Nation Slack bot, it is stored in the F3 Nation database. This page reads that same record, so there is nothing to copy over and nothing that can fall out of sync.</p>
+      </div>
+      <div class="subscribe-actions">
+        <a class="button primary" href="schedule.html">Find a workout</a>
+        <a class="button secondary" href="https://f3nation.com/" target="_blank" rel="noopener">About F3</a>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="footer-main"><img src="assets/f3-circle.svg?v=mark2" alt="F3 The Remnant"><div><h3>Find us in the gloom.</h3><p>The Remnant region</p></div><div class="footer-links"><a href="index.html">Home</a><a href="schedule.html">Full Schedule</a><a href="backblasts.html">Backblasts</a><a href="events.html">CSAUP &amp; Events</a><a href="fng.html">FNG Form</a><a href="https://f3near.me/" target="_blank" rel="noopener">F3Near.Me</a><a href="mailto:info@f3theremnant.com">Email us</a></div></div>
+    <div class="footer-bottom"><span>© 2026 F3 The Remnant</span><span>Free · Open to all men · Held outdoors · Peer led · Ends with a Circle of Trust</span></div>
+  </footer>
+</main>
+</body>
+</html>
