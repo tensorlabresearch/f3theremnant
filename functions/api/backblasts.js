@@ -11,7 +11,8 @@ import fallback from "../../data/backblasts.json";
 // A non-null paxCount is the signal that a backblast exists. The list endpoint
 // does not return the text, so each row on the page costs one detail fetch.
 const API = "https://api.f3nation.com/v1";
-const DEFAULT_REGION = "52724"; // The Remnantconst WINDOW_DAYS = 60; // how much history one list call covers
+const DEFAULT_REGION = "52724"; // The Remnant
+const WINDOW_DAYS = 60; // how much history one list call covers
 const MAX_WINDOWS = 4; // per request, so a quiet stretch still fills a page
 const HISTORY_DAYS = 1460; // four years; past this the library stops offering more
 const PAGE_SIZE = 100; // API cap; anything larger is a 400
@@ -44,6 +45,25 @@ const shiftDay = (date, days) => {
 };
 
 const isDay = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? "");
+
+// Rows are ordered newest-first by (startDate, startTime, id). A date-only cursor
+// would silently drop the other backblasts from a day the page cut in half, so the
+// cursor carries all three and comparisons use the same tuple.
+const compareRows = (a, b) =>
+  String(a.startDate).localeCompare(String(b.startDate)) ||
+  String(a.startTime ?? "").localeCompare(String(b.startTime ?? "")) ||
+  Number(a.id) - Number(b.id);
+
+const parseCursor = (value) => {
+  const match = String(value ?? "").match(/^(\d{4}-\d{2}-\d{2})(?:\|(\d{4})?\|(\d+))?$/);
+  if (!match) return null;
+  return { startDate: match[1], startTime: match[2] ?? "", id: Number(match[3] ?? 0) };
+};
+
+const formatCursor = (row) => `${row.startDate}|${row.startTime ?? ""}|${row.id}`;
+
+// True when `row` sorts strictly older than the cursor.
+const olderThan = (row, cursor) => compareRows(row, cursor) < 0;
 
 // Slack mentions arrive as <@U123> and links as <url|label>; the bot resolves
 // most of them, but not all, and the rest would render as raw markup.
@@ -113,12 +133,7 @@ const listPosted = async ({ key, client, region, from, to, ao }) => {
 
   return rows
     .filter((row) => row && isDay(row.startDate) && row.paxCount != null)
-    .sort(
-      (a, b) =>
-        String(b.startDate).localeCompare(String(a.startDate)) ||
-        String(b.startTime ?? "").localeCompare(String(a.startTime ?? "")) ||
-        Number(b.id) - Number(a.id)
-    );
+    .sort((a, b) => compareRows(b, a));
 };
 
 const shape = (row, detail) => {
@@ -157,11 +172,16 @@ export async function onRequestGet({ request, env }) {
   );
 
   const floor = dayString(-HISTORY_DAYS);
-  const cursor = isDay(before) ? before : dayString(0);
+  const start = parseCursor(before);
+  // A date-only cursor (the first page) starts at today and includes every row on
+  // it, so its startTime sorts after any real one. A full cursor resumes exactly
+  // after the last row the reader saw.
+  const cursor = start ?? { startDate: dayString(0), startTime: "9999", id: Infinity };
 
   try {
     const rows = [];
-    let to = cursor;
+    let to = cursor.startDate;
+    let firstWindow = true;
 
     // Walk backwards until the page is full or the floor is reached. A month
     // with no backblasts (or a stretch where nobody posted) then costs a couple
@@ -176,7 +196,9 @@ export async function onRequestGet({ request, env }) {
         to,
         ao: /^\d+$/.test(aoParam) ? aoParam : "",
       });
-      rows.push(...posted);
+      // The first window includes the cursor's own day, so drop rows already read.
+      rows.push(...(firstWindow ? posted.filter((row) => olderThan(row, cursor)) : posted));
+      firstWindow = false;
       to = shiftDay(from, -1);
     }
 
@@ -197,8 +219,8 @@ export async function onRequestGet({ request, env }) {
       .filter(Boolean);
 
     const nextBefore = page.length
-      ? shiftDay(String(page[page.length - 1].startDate), -1)
-      : shiftDay(cursor, -WINDOW_DAYS);
+      ? formatCursor(page[page.length - 1])
+      : formatCursor({ startDate: shiftDay(cursor.startDate, -WINDOW_DAYS), startTime: "", id: 0 });
 
     return Response.json(
       { backblasts, nextBefore, hasMore: nextBefore >= floor },
