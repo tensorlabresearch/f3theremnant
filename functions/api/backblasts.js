@@ -142,14 +142,21 @@ const listPosted = async ({ key, client, region, from, to, ao }) => {
 const shape = (row, detail) => {
   const parsed = parseBackblast(detail?.backblast ?? "");
   const ao = detail?.org?.name || row.aoName || parsed.ao || "";
+  // The bot writes Co-Qs into the Q line rather than a field of their own, so
+  // "Seagall , Saget" is really a Q and a Co-Q. Split on the separator the bot
+  // itself uses.
+  const qs = (parsed.q || "")
+    .split(/\s*,\s*/)
+    .map((name) => name.trim())
+    .filter(Boolean);
   return {
     id: row.id,
     startDate: row.startDate,
     startTime: row.startTime || "",
     orgId: row.orgId ?? null,
     ao,
-    q: parsed.q || "",
-    coq: parsed.coq || "",
+    q: qs[0] || "",
+    coq: [parsed.coq, ...qs.slice(1)].filter(Boolean).join(", "),
     pax: parsed.pax || "",
     fngs: parsed.fngs || "",
     paxCount: Number(row.paxCount) || 0,
