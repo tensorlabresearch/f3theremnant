@@ -73,6 +73,9 @@ const clean = (value) =>
     .replace(/<([^|>]+)\|[^>]+>/g, "$1")
     .replace(/<([^>]+)>/g, "$1")
     .replace(/\s+/g, " ")
+    // The bot formats "Q: {q} {coqs}", so an empty Co-Q list leaves a trailing
+    // comma behind on the Q line.
+    .replace(/^[\s,;·-]+|[\s,;·-]+$/g, "")
     .trim();
 
 const HEADER_KEYS = new Set(["date", "ao", "q", "coq", "pax", "fngs", "count"]);
