@@ -139,6 +139,31 @@ const listPosted = async ({ key, client, region, from, to, ao }) => {
     .sort((a, b) => compareRows(b, a));
 };
 
+// The bot stores uploaded images in meta.files. Only these two hosts appear in
+// real data, so the CSP in _headers/_middleware.js allows exactly these and the
+// API drops anything else rather than letting a stray URL widen the page.
+const PHOTO_HOSTS = new Set([
+  "storage.googleapis.com",
+  "slackblast-images.s3.amazonaws.com",
+]);
+
+const photosOf = (detail) => {
+  const files = detail?.meta?.files;
+  if (!Array.isArray(files)) return [];
+  return files
+    .map((value) => {
+      try {
+        const url = new URL(String(value));
+        if (url.protocol !== "https:") return null;
+        if (!PHOTO_HOSTS.has(url.host)) return null;
+        return url.toString();
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+};
+
 const shape = (row, detail) => {
   const parsed = parseBackblast(detail?.backblast ?? "");
   const ao = detail?.org?.name || row.aoName || parsed.ao || "";
@@ -163,6 +188,7 @@ const shape = (row, detail) => {
     fngCount: Number(row.fngCount) || 0,
     title: parsed.title || row.name || ao || "Backblast",
     body: parsed.body || "",
+    photos: photosOf(detail),
     eventType: detail?.eventTypes?.[0]?.eventTypeName || "",
   };
 };

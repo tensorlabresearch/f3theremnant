@@ -293,6 +293,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const count = Number(backblast.paxCount) || 0;
     const fngs = Number(backblast.fngCount) || 0;
     const showBody = !compact && backblast.body;
+    const photos = Array.isArray(backblast.photos) ? backblast.photos : [];
+    const photoBlock = photos.length
+      ? `<div class="backblast-photos${photos.length === 1 ? " single" : ""}">${photos
+          .map(
+            (src, index) =>
+              `<a href="${esc(src)}" target="_blank" rel="noopener"><img src="${esc(src)}" alt="${esc(
+                backblast.title
+              )} — photo ${index + 1}" width="800" height="600" loading="lazy" decoding="async"></a>`
+          )
+          .join("")}</div>`
+      : "";
     return `<article class="backblast-card">
       <div class="backblast-date" aria-hidden="true"><span>${esc(month)}</span><b>${esc(day)}</b></div>
       <div class="backblast-body">
@@ -302,6 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </header>
         ${paxLine(backblast) ? `<p class="backblast-q">${paxLine(backblast)}</p>` : ""}
         ${showBody ? `<div class="backblast-text">${paragraphs(backblast.body)}</div>` : ""}
+        ${photoBlock}
         ${!compact && !backblast.body ? `<p class="form-note">The moleskin for this one has not been filled in yet.</p>` : ""}
         <div class="backblast-meta">
           ${count ? `<span><b>${count}</b> PAX</span>` : ""}
