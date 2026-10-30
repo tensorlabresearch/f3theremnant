@@ -286,6 +286,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return parts.join(" · ");
   };
 
+  // The bot writes PAX as a comma-separated list. Some backblasts name only the
+  // Q even though more men posted, so the names can be shorter than the count —
+  // the count is what the Q actually reported, so show both rather than imply the
+  // list is complete.
+  const paxNames = (backblast) =>
+    String(backblast.pax || "")
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+
   const backblastCard = (backblast, compact) => {
     const parsed = parseDay(backblast.startDate);
     const month = parsed ? MONTH_ABBR[parsed.getUTCMonth()] : "";
@@ -312,12 +322,20 @@ document.addEventListener("DOMContentLoaded", () => {
           <p class="backblast-when">${esc(backblast.ao)}${backblast.startTime ? ` · ${esc(timeLabel(backblast.startTime))}` : ""}${backblast.eventType ? ` · ${esc(backblast.eventType)}` : ""}</p>
         </header>
         ${paxLine(backblast) ? `<p class="backblast-q">${paxLine(backblast)}</p>` : ""}
+        ${!compact && paxNames(backblast).length
+          ? `<p class="backblast-pax"><span class="backblast-label">PAX</span> ${paxNames(backblast)
+              .map((name) => `<span class="pax-name">${esc(name)}</span>`)
+              .join("")}</p>`
+          : ""}
         ${showBody ? `<div class="backblast-text">${paragraphs(backblast.body)}</div>` : ""}
         ${photoBlock}
         ${!compact && !backblast.body ? `<p class="form-note">The moleskin for this one has not been filled in yet.</p>` : ""}
         <div class="backblast-meta">
           ${count ? `<span><b>${count}</b> PAX</span>` : ""}
           ${fngs ? `<span><b>${fngs}</b> FNG${fngs === 1 ? "" : "s"}</span>` : ""}
+          ${count && paxNames(backblast).length && paxNames(backblast).length < count
+            ? `<span class="backblast-partial">${paxNames(backblast).length} of ${count} named</span>`
+            : ""}
           ${backblast.source === "archive"
             ? `<span class="backblast-archived">From the archive</span>${
                 backblast.archiveUrl
