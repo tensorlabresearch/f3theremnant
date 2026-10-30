@@ -31,11 +31,18 @@ const TARGETS = new Map([
 ]);
 
 const decodeEntities = (s) =>
-  s.replace(/&#8211;/g, "–").replace(/&#8212;/g, "—")
-    .replace(/&#8216;|&#8217;/g, "'").replace(/&#8220;|&#8221;/g, '"')
-    .replace(/&#8230;|&hellip;/g, "…").replace(/&#x2d;/gi, "-")
-    .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
+  String(s)
+    // Numeric entities first, so a doubly-encoded "&amp;#038;" decodes to the
+    // literal "&#038;" instead of being collapsed all the way to "&".
+    .replace(/&#(x?)([0-9a-f]+);/gi, (_, hex, code) =>
+      String.fromCodePoint(parseInt(code, hex ? 16 : 10))
+    )
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&hellip;/g, "…");
 
 const stripTags = (html) =>
   html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|h\d)>/gi, "\n").replace(/<[^>]+>/g, "");
@@ -176,7 +183,7 @@ function build() {
     const date = toIso(page.when);
     if (!date) { skipped.noDate += 1; continue; }
 
-    const title = String(page.title || "").trim();
+    const title = decodeEntities(String(page.title || "").trim());
     rows.push({
       id: `wp-${slugOf(url)}`,
       source: "archive",
@@ -191,7 +198,7 @@ function build() {
       paxCount: Number(page.paxCount) || 0,
       fngCount: Number(page.fngCount) || 0,
       title: title || target.ao,
-      body: cleanText(page.body),
+      body: cleanText(decodeEntities(page.body)),
       photos: [],
       eventType: "",
       archiveUrl: url,
