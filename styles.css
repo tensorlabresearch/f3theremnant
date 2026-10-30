@@ -278,6 +278,8 @@ footer { padding:70px clamp(24px,7vw,110px) 30px; background:#030302; }
 .backblast-meta b { color:var(--gold); font-size:15px; }
 .backblast-meta a { color:var(--yellow); }
 .backblast-meta a:hover { color:#fff; }
+.backblast-archived { padding:3px 8px; color:#cbbf9f; background:#241d13; border:1px solid var(--line); font-size:10px; letter-spacing:.08em; }
+.backblast-card.archived { border-left-color:#6b5c3d; }
 .library-more { display:flex; justify-content:center; margin-top:30px; }
 .library-more .button { min-height:50px; padding:0 34px; }
 .library-more .button[hidden] { display:none; }

@@ -304,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
           )
           .join("")}</div>`
       : "";
-    return `<article class="backblast-card">
+    return `<article class="backblast-card${backblast.source === "archive" ? " archived" : ""}">
       <div class="backblast-date" aria-hidden="true"><span>${esc(month)}</span><b>${esc(day)}</b></div>
       <div class="backblast-body">
         <header>
@@ -318,6 +318,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="backblast-meta">
           ${count ? `<span><b>${count}</b> PAX</span>` : ""}
           ${fngs ? `<span><b>${fngs}</b> FNG${fngs === 1 ? "" : "s"}</span>` : ""}
+          ${backblast.source === "archive"
+            ? `<span class="backblast-archived">From the archive</span>${
+                backblast.archiveUrl
+                  ? `<a href="${esc(backblast.archiveUrl)}" target="_blank" rel="noopener">Original ↗</a>`
+                  : ""
+              }`
+            : ""}
           ${compact ? `<a href="backblasts.html">Read it ↗</a>` : ""}
         </div>
       </div>

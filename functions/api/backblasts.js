@@ -1,4 +1,5 @@
 import fallback from "../../data/backblasts.json";
+import archive from "../../data/backblasts-archive.json";
 
 // Backblasts are written once, in Slack, by the Q. The F3 Nation Slack bot
 // stores them in the Nation database, so the site can read the same rows the bot
@@ -49,21 +50,34 @@ const isDay = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? "");
 // Rows are ordered newest-first by (startDate, startTime, id). A date-only cursor
 // would silently drop the other backblasts from a day the page cut in half, so the
 // cursor carries all three and comparisons use the same tuple.
+const compareIds = (a, b) => {
+  const left = String(a ?? "");
+  const right = String(b ?? "");
+  // Live ids are numbers and archive ids are strings ("wp-…"); compare the shared
+  // prefix numerically, then the whole string, so both order sanely.
+  return left.localeCompare(right, undefined, { numeric: true });
+};
+
 const compareRows = (a, b) =>
   String(a.startDate).localeCompare(String(b.startDate)) ||
   String(a.startTime ?? "").localeCompare(String(b.startTime ?? "")) ||
-  Number(a.id) - Number(b.id);
+  compareIds(a.id, b.id);
 
+// Cursor format: startDate|startTime|id. Ids never contain a pipe, and the id
+// segment is taken whole so a string id survives the round trip.
 const parseCursor = (value) => {
-  const match = String(value ?? "").match(/^(\d{4}-\d{2}-\d{2})(?:\|(\d{4})?\|(\d+))?$/);
-  if (!match) return null;
-  return { startDate: match[1], startTime: match[2] ?? "", id: Number(match[3] ?? 0) };
+  const raw = String(value ?? "");
+  if (!raw) return null;
+  const [startDate, startTime = "", ...rest] = raw.split("|");
+  if (!isDay(startDate)) return null;
+  return { startDate, startTime, id: rest.join("|") };
 };
 
-const formatCursor = (row) => `${row.startDate}|${row.startTime ?? ""}|${row.id}`;
+const formatCursor = (row) => `${row.startDate}|${row.startTime ?? ""}|${row.id ?? ""}`;
 
-// True when `row` sorts strictly older than the cursor.
-const olderThan = (row, cursor) => compareRows(row, cursor) < 0;
+// True when `row` sorts strictly older than the cursor. A null cursor means the
+// reader is on the first page, so nothing is filtered out.
+const olderThan = (row, cursor) => !cursor || compareRows(row, cursor) < 0;
 
 // Slack mentions arrive as <@U123> and links as <url|label>; the bot resolves
 // most of them, but not all, and the rest would render as raw markup.
@@ -164,8 +178,30 @@ const photosOf = (detail) => {
     .filter(Boolean);
 };
 
-const shape = (row, detail) => {
-  const parsed = parseBackblast(detail?.backblast ?? "");
+// The archive is a committed snapshot, newest-first, already limited to the AOs
+// the region still runs. It is returned in the same shape as a live row so the
+// page needs no second renderer.
+//
+// The order must match compareRows exactly: within one date the cursor resumes on
+// (startTime, id), so a title-ordered file would let rows slip between pages.
+const archiveRows = (archive.backblasts || [])
+  .map((row) => ({ ...row, startTime: row.startTime || "" }))
+  .sort((a, b) => compareRows(b, a));
+
+const archiveRowsFor = ({ before, ao, limit }) => {
+  if (limit <= 0) return [];
+  const cursor = parseCursor(before);
+  const aoId = /^\d+$/.test(ao) ? Number(ao) : null;
+  return archiveRows
+    .filter((row) => {
+      if (aoId !== null && row.orgId !== aoId) return false;
+      if (!cursor) return true;
+      return olderThan(row, cursor);
+    })
+    .slice(0, limit);
+};
+
+const shape = (row, detail) => {  const parsed = parseBackblast(detail?.backblast ?? "");
   const ao = detail?.org?.name || row.aoName || parsed.ao || "";
   // The bot writes Co-Qs into the Q line rather than a field of their own, so
   // "Seagall , Saget" is really a Q and a Co-Q. Split on the separator the bot
@@ -208,35 +244,37 @@ export async function onRequestGet({ request, env }) {
   );
 
   const floor = dayString(-HISTORY_DAYS);
-  const start = parseCursor(before);
-  // A date-only cursor (the first page) starts at today and includes every row on
-  // it, so its startTime sorts after any real one. A full cursor resumes exactly
-  // after the last row the reader saw.
-  const cursor = start ?? { startDate: dayString(0), startTime: "9999", id: Infinity };
+  const cursor = parseCursor(before);
+  const aoId = /^\d+$/.test(aoParam) ? aoParam : "";
 
   try {
     const rows = [];
-    let to = cursor.startDate;
+    // The archive is a finite static snapshot, so it is simply the older tail of the
+    // same newest-first stream. Once the cursor reaches its oldest row there is no
+    // reason to keep asking the live API, which is what made deep pages expensive.
+    const archiveStart = archiveRows.length ? archiveRows[archiveRows.length - 1].startDate : "";
+    const liveFloor = archiveStart && archiveStart > floor ? archiveStart : floor;
+    let to = cursor ? cursor.startDate : dayString(0);
     let firstWindow = true;
 
-    // Walk backwards until the page is full or the floor is reached. A month
-    // with no backblasts (or a stretch where nobody posted) then costs a couple
-    // of cheap list calls instead of handing the reader an empty page.
-    for (let window = 0; window < MAX_WINDOWS && rows.length < limit && to >= floor; window += 1) {
+    // Walk backwards until the page is full or the live source is exhausted.
+    for (let window = 0; window < MAX_WINDOWS && rows.length < limit && to >= liveFloor; window += 1) {
       const from = shiftDay(to, -(WINDOW_DAYS - 1));
       const posted = await listPosted({
         key,
         client,
         region,
-        from: from < floor ? floor : from,
+        from: from < liveFloor ? liveFloor : from,
         to,
-        ao: /^\d+$/.test(aoParam) ? aoParam : "",
+        ao: aoId,
       });
       // The first window includes the cursor's own day, so drop rows already read.
       rows.push(...(firstWindow ? posted.filter((row) => olderThan(row, cursor)) : posted));
       firstWindow = false;
       to = shiftDay(from, -1);
     }
+
+    const liveDone = to < liveFloor;
 
     const page = rows.slice(0, limit);
 
@@ -246,7 +284,7 @@ export async function onRequestGet({ request, env }) {
       page.map((row) => call(`/event-instance/id/${row.id}`, key, client))
     );
 
-    const backblasts = page
+    const live = page
       .map((row, index) => {
         const result = details[index];
         if (result.status !== "fulfilled" || !result.value) return null;
@@ -254,12 +292,23 @@ export async function onRequestGet({ request, env }) {
       })
       .filter(Boolean);
 
-    const nextBefore = page.length
-      ? formatCursor(page[page.length - 1])
-      : formatCursor({ startDate: shiftDay(cursor.startDate, -WINDOW_DAYS), startTime: "", id: 0 });
+    // Top the page up from the archive, using the same cursor the live rows use.
+    // Where the two sources overlap (both cover the weeks around when the Nation
+    // database took over), prefer the live row: it carries the photos and the
+    // formatting the bot wrote, and the archive copy is the same workout.
+    const liveKeys = new Set(live.map((row) => `${row.startDate}|${row.orgId}`));
+    const archived = archiveRowsFor({ before, ao: aoId, limit: limit - live.length + liveKeys.size })
+      .filter((row) => !liveKeys.has(`${row.startDate}|${row.orgId}`))
+      .slice(0, limit - live.length);
+    const backblasts = [...live, ...archived];
+    const last = backblasts[backblasts.length - 1];
+    const nextBefore = last ? formatCursor(last) : formatCursor({ startDate: to, startTime: "", id: "" });
+
+    // "Load older" stays only while one of the two sources still has rows.
+    const archiveLeft = archiveRowsFor({ before: nextBefore, ao: aoId, limit: 1 }).length > 0;
 
     return Response.json(
-      { backblasts, nextBefore, hasMore: nextBefore >= floor },
+      { backblasts, nextBefore, hasMore: !liveDone || archiveLeft },
       { headers: { "cache-control": "public, max-age=600" } }
     );
   } catch {
